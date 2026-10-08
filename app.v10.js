@@ -14,6 +14,8 @@ const elements = {
   select: document.querySelector("#lesson-select"), random: document.querySelector("#random-order"),
   input: document.querySelector("#answer-input"), result: document.querySelector("#check-result"),
   currentErrors: document.querySelector("#current-errors"),
+  reviewAction: document.querySelector("#review-cards"), reviewActionCount: document.querySelector("#review-action-count"),
+  search: document.querySelector("#word-search"), searchResults: document.querySelector("#search-results"),
 };
 
 function shuffle(items) { return [...items].sort(() => Math.random() - 0.5); }
@@ -35,6 +37,25 @@ function loadCards() {
   currentIndex = 0; revealed = false; elements.input.value = ""; elements.result.textContent = ""; render();
 }
 
+function reviewCards() {
+  cards = allCards.filter((card) => {
+    const record = recordFor(card.id);
+    return record.grade === "forgot" || record.grade === "hard";
+  });
+  if (elements.random.checked) cards = shuffle(cards);
+  currentIndex = 0; revealed = false; elements.input.value = ""; elements.result.textContent = "";
+  if (!cards.length) { elements.prompt.textContent = "目前没有待复习的词"; elements.progress.textContent = "待复习 · 0 / 0"; return; }
+  render();
+}
+
+function searchWords() {
+  const query = normalize(elements.search.value);
+  if (!query) { elements.searchResults.innerHTML = ""; elements.searchResults.classList.add("hidden"); return; }
+  const found = allCards.filter((card) => normalize(`${card.japanese}${card.kanji}${card.chinese}`).includes(query)).slice(0, 30);
+  elements.searchResults.classList.remove("hidden");
+  elements.searchResults.innerHTML = found.length ? found.map((card) => `<button type="button" data-card-id="${card.id}"><b>${card.kanji || card.japanese}</b><span>${card.japanese} · ${card.chinese}</span><small>第 ${card.lesson} 课</small></button>`).join("") : "<p>没有找到匹配的词。</p>";
+}
+
 function render() {
   const card = currentCard();
   if (!card) { elements.prompt.textContent = "词库加载失败"; return; }
@@ -53,6 +74,7 @@ function render() {
   const records = Object.values(progress).map((item) => typeof item === "object" ? item : { grade: item });
   elements.known.textContent = records.filter((record) => record.grade === "easy").length;
   elements.review.textContent = records.filter((record) => record.grade && record.grade !== "easy").length;
+  elements.reviewActionCount.textContent = elements.review.textContent;
 }
 
 function saveGrade(grade) {
@@ -91,6 +113,13 @@ document.querySelector("#reveal").addEventListener("click", () => { revealed = !
 document.querySelectorAll("[data-grade]").forEach((button) => button.addEventListener("click", () => saveGrade(button.dataset.grade)));
 document.querySelector("#next-card").addEventListener("click", nextCard);
 elements.select.addEventListener("change", loadCards); elements.random.addEventListener("change", loadCards);
+elements.reviewAction.addEventListener("click", reviewCards);
+elements.search.addEventListener("input", searchWords);
+elements.searchResults.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-card-id]"); if (!button) return;
+  const card = allCards.find((item) => item.id === button.dataset.cardId); if (!card) return;
+  cards = [card]; currentIndex = 0; revealed = true; elements.search.value = ""; elements.searchResults.innerHTML = ""; elements.searchResults.classList.add("hidden"); render();
+});
 document.querySelector("#check-answer").addEventListener("click", checkAnswer); document.querySelector("#sound").addEventListener("click", speak);
 loadCards();
 if (location.protocol.startsWith("http") && "serviceWorker" in navigator) navigator.serviceWorker.register("service-worker.js");

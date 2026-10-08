@@ -27,6 +27,11 @@
       <label>词库<select id="lesson-select"><option value="all">第 1–24 课</option><option value="1">第 1 课</option><option value="2">第 2 课</option><option value="3">第 3 课</option><option value="4">第 4 课</option><option value="5">第 5 课</option><option value="6">第 6 课</option><option value="7">第 7 课</option><option value="8">第 8 课</option><option value="9">第 9 课</option><option value="10">第 10 课</option><option value="11">第 11 课</option><option value="12">第 12 课</option><option value="13">第 13 课</option><option value="14">第 14 课</option><option value="15">第 15 课</option><option value="16">第 16 课</option><option value="17">第 17 课</option><option value="18">第 18 课</option><option value="19">第 19 课</option><option value="20">第 20 课</option><option value="21">第 21 课</option><option value="22">第 22 课</option><option value="23">第 23 课</option><option value="24">第 24 课</option></select></label>
       <label class="random-option"><input id="random-order" type="checkbox" /> 随机顺序</label>
     </section>
+    <section class="quick-actions">
+      <button id="review-cards" type="button">待复习 <span id="review-action-count">0</span></button>
+      <label class="search-box"><input id="word-search" type="search" placeholder="查日文、假名或中文" autocomplete="off" /></label>
+    </section>
+    <section id="search-results" class="search-results hidden" aria-live="polite"></section>
 
     <section id="card" class="card" aria-live="polite">
       <p id="prompt-label" class="card-label">中文</p>
