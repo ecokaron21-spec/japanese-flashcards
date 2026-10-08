@@ -40,7 +40,7 @@ function loadCards() {
 function reviewCards() {
   cards = allCards.filter((card) => {
     const record = recordFor(card.id);
-    return record.grade === "forgot" || record.grade === "hard";
+    return record.errors > 0 || record.grade === "forgot" || record.grade === "hard";
   });
   if (elements.random.checked) cards = shuffle(cards);
   currentIndex = 0; revealed = false; elements.input.value = ""; elements.result.textContent = "";
@@ -73,7 +73,10 @@ function render() {
   elements.currentErrors.textContent = `本词错误：${recordFor(card.id).errors} 次`;
   const records = Object.values(progress).map((item) => typeof item === "object" ? item : { grade: item });
   elements.known.textContent = records.filter((record) => record.grade === "easy").length;
-  elements.review.textContent = records.filter((record) => record.grade && record.grade !== "easy").length;
+  elements.review.textContent = Object.keys(progress).filter((id) => {
+    const record = recordFor(id);
+    return record.errors > 0 || record.grade === "forgot" || record.grade === "hard";
+  }).length;
   elements.reviewActionCount.textContent = elements.review.textContent;
 }
 
